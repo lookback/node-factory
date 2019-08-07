@@ -22,8 +22,8 @@ test(
   async ({ db }) => {
     Factory.define('author', db.authors, {
       name: "John Smith"
-    }).after(doc => {
-      var author = Factory.create('author');
+    }).after(async (doc) => {
+      var author = await Factory.create('author');
       assert.equal(author.name, "John Smith");
       assert.equal(doc.name, "John Smith");
     });
