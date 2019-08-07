@@ -1,0 +1,21 @@
+{
+  "name": "factory",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "loltest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^12.6.9",
+    "monk": "^7",
+    "modifyjs": "0.3.1"
+  },
+  "devDependencies": {
+    "loltest": "github:lookback/loltest#1.1.2",
+    "mongodb-memory-server": "^5.1.2",
+    "typescript": "^3.2.4"
+  }
+}
