@@ -1,7 +1,5 @@
 import * as modify from 'modifyjs';
 
-/* global Factory:true */
-
 const randomId = (): string => {
   const length = 17;
   let s = '';
