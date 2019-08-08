@@ -13,7 +13,7 @@ const randomId = (): string => {
 
 const factories = {};
 
-let Factory: any = {};
+let factory: any = {};
 
 class FactoryClass {
   name: string;
@@ -36,25 +36,25 @@ class FactoryClass {
   }
 };
 
-Factory.define = (name, collection, attributes) => {
+factory.define = (name, collection, attributes) => {
   factories[name] = new FactoryClass(name, collection, attributes);
   return factories[name];
 };
 
-Factory.get = name => {
+factory.get = name => {
   const factory = factories[name];
   if (! factory) {
-    throw new Error("Factory: There is no factory named " + name);
+    throw new Error("factory: There is no factory named " + name);
   }
   return factory;
 };
 
-Factory._build = (name, attributes = {}, userOptions = {}, options = {}) => {
-  const factory = Factory.get(name);
+factory._build = (name, attributes = {}, userOptions = {}, options = {}) => {
+  const fac = factory.get(name);
 
   // "raw" attributes without functions evaluated, or dotted properties resolved
   const extendedAttributes = {
-    ...factory.attributes,
+    ...fac.attributes,
     ...attributes
   };
 
@@ -62,10 +62,10 @@ Factory._build = (name, attributes = {}, userOptions = {}, options = {}) => {
   // or return a 'fake' _id (since we're not inserting anything)
   const makeRelation = relName => {
     if (options.insert) {
-      return Factory.create(relName, {}, userOptions)._id;
+      return factory.create(relName, {}, userOptions)._id;
     }
     if (options.tree) {
-      return Factory._build(relName, {}, userOptions, {tree: true});
+      return factory._build(relName, {}, userOptions, {tree: true});
     }
     // fake an id on build
     return randomId();
@@ -76,12 +76,12 @@ Factory._build = (name, attributes = {}, userOptions = {}, options = {}) => {
   };
 
   const getValueFromFunction = (func, record) => {
-    const api = { sequence: fn => fn(factory.sequence) };
+    const api = { sequence: fn => fn(fac.sequence) };
     const fnRes = func.call(record, api, userOptions);
     return getValue(fnRes);
   };
 
-  factory.sequence += 1;
+  fac.sequence += 1;
 
   const walk = (object, getTop?) => {
     return Object.entries(object).reduce((record, attribute: any) => {
@@ -90,7 +90,7 @@ Factory._build = (name, attributes = {}, userOptions = {}, options = {}) => {
       }
       const [key, value] = attribute;
       let newValue: any = value;
-      // is this a Factory instance?
+      // is this a FactoryClass instance?
       if (value instanceof FactoryClass) {
         newValue = makeRelation(value.name);
       } else if (value instanceof Array) {
@@ -128,35 +128,35 @@ Factory._build = (name, attributes = {}, userOptions = {}, options = {}) => {
   return result;
 };
 
-Factory.build = (name, attributes = {}, userOptions = {}) => {
-  return Factory._build(name, attributes, userOptions);
+factory.build = (name, attributes = {}, userOptions = {}) => {
+  return factory._build(name, attributes, userOptions);
 };
 
-Factory.tree = (name, attributes, userOptions = {}) => {
-  return Factory._build(name, attributes, userOptions, {tree: true});
+factory.tree = (name, attributes, userOptions = {}) => {
+  return factory._build(name, attributes, userOptions, {tree: true});
 };
 
-Factory._create = async (name, doc) => {
-  const collection = Factory.get(name).collection;
+factory._create = async (name, doc) => {
+  const collection = factory.get(name).collection;
   const insertId = await collection.insert(doc);
   const record = await collection.findOne(insertId);
   return record;
 };
 
-Factory.create = (name, attributes = {}, userOptions = {}) => {
-  const doc = Factory._build(name, attributes, userOptions, {insert: true});
-  const record = Factory._create(name, doc);
+factory.create = (name, attributes = {}, userOptions = {}) => {
+  const doc = factory._build(name, attributes, userOptions, {insert: true});
+  const record = factory._create(name, doc);
 
-  Factory.get(name).afterHooks.forEach(cb => cb(record));
+  factory.get(name).afterHooks.forEach(cb => cb(record));
 
   return record;
 };
 
-Factory.extend = (name, attributes = {}) => {
+factory.extend = (name, attributes = {}) => {
   return {
-    ...Factory.get(name).attributes,
+    ...factory.get(name).attributes,
     ...attributes
   }
 };
 
-export default Factory;
+export default factory;
