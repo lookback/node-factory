@@ -1,12 +1,11 @@
 import * as assert from 'assert';
 import { mockMongo, unmockMongo } from './_mock-mongo';
 import { test } from 'loltest';
-import factory from '../src/factory';
 
 test(
   "Factory - Build - Basic build works",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
       factory.define('author', db.authors, {
         name: "John Smith"
       });
@@ -19,7 +18,7 @@ test(
 test(
   "Factory - Define - After hook",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith"
     }).after(async (doc) => {
@@ -34,7 +33,7 @@ test(
 test(
   "Factory - Build - Functions - Basic",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name() {
         return "John Smith";
@@ -49,7 +48,7 @@ test(
 test(
   "Factory - Build - Functions - Context",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       test: "John Smith",
       name() {
@@ -67,7 +66,7 @@ test(
 test(
   "Factory - Build - Dotted properties - Basic",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       "profile.name": "John Smith"
     });
@@ -80,7 +79,7 @@ test(
 test(
   "Factory - Build - Dotted properties - Context",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith",
       'profile.name'() {
@@ -96,7 +95,7 @@ test(
 test(
   "Factory - Build - Deep objects",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       profile: {
         name: "John Smith"
@@ -111,7 +110,7 @@ test(
 test(
   "Factory - Build - Functions - Deep object - Basic",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       profile: {
         name() {
@@ -128,7 +127,7 @@ test(
 test(
   "Factory - Build - Functions - Deep object - Context",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith",
       profile: {
@@ -146,7 +145,7 @@ test(
 test(
   "Factory - Build - Extend - Basic",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith"
     });
@@ -161,7 +160,7 @@ test(
 test(
   "Factory - Build - Extend - With attributes",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith"
     });
@@ -179,7 +178,7 @@ test(
 test(
   "Factory - Build - Extend - With attributes (check that we don't modify the parent)",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith"
     });
@@ -201,7 +200,7 @@ test(
 test(
   "Factory - Build - Extend - Parent with relationship",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith"
     });
@@ -224,7 +223,7 @@ test(
 test(
   "Factory - Build - Extend - Parent with relationship - Extra attributes",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith"
     });
@@ -251,7 +250,7 @@ test(
 test(
   "Factory - Create - Basic",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith"
     });
@@ -266,7 +265,7 @@ test(
 test(
   "Factory - Create - Relationship",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith"
     });
@@ -287,7 +286,7 @@ test(
 test(
   "Factory - Create - Relationship - return a Factory from function",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith"
     });
@@ -300,7 +299,7 @@ test(
       year: 2014
     });
 
-    var book = factory.create('book');
+    var book = await factory.create('book');
 
     assert.equal((await db.authors.findOne(book.authorId)).name, "John Smith");
   },
@@ -310,7 +309,7 @@ test(
 test(
   "Factory - Create - Relationship - return a Factory from deep function (dotted)",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith"
     });
@@ -333,7 +332,7 @@ test(
 test(
   "Factory - Create - Relationship - return a Factory from deep function",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith"
     });
@@ -358,7 +357,7 @@ test(
 test(
   "Factory - Build - Sequence",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith",
       email(factory) {
@@ -377,7 +376,7 @@ test(
 test(
   "Factory - Create - Sequence",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     db.authors.remove({});
 
     factory.define('author', db.authors, {
@@ -403,7 +402,7 @@ test(
 test(
   "Factory - Build - Array with Factory",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith"
     });
@@ -423,7 +422,7 @@ test(
 test(
   "Factory - Build - Array with function returning a Factory",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith"
     });
@@ -443,7 +442,7 @@ test(
 test(
   "Factory - Build - Array with an object",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('book', db.books, {
       array: [{objectInArray: true}]
     });
@@ -459,7 +458,7 @@ test(
 // test(
 //  "Factory - Build - Array with an object containing a function",
 //  mockMongo,
-//  async ({ db }) => {
+//  async ({ db, factory }) => {
 //   factory.define('book', db.books, {
 //     array: [{objectInArrayWithFn: () => true}]
 //   });
@@ -474,7 +473,7 @@ test(
 test(
   "Factory - Tree - Basic",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith"
     });
@@ -494,7 +493,7 @@ test(
 test(
   "Factory - Build - With options",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('author', db.authors, {
       name: "John Smith",
       books(factory, options = { bookCount: 2 }) {
@@ -520,7 +519,7 @@ test(
 test(
   "Factory - Create - With options",
   mockMongo,
-  async ({ db }) => {
+  async ({ db, factory }) => {
     factory.define('book', db.books, {
       name: "A book",
       pages(factory, options = { pageCount: 2 }) {
