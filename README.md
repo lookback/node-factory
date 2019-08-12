@@ -21,25 +21,29 @@ A package for creating test data or for generating fixtures.
 ### Defining factories
 
 ```javascript
+import Factory from 'factory';
+
+const factory = new Factory();
+
 // Reference to mongo collections. Depending on how you interface with mongo
 // getting these references will vary. The important part is that the collection
 // should have the async functions `insert` and `findOne`.
 const { authors, books } = db;
 
-Factory.define('author', authors, {
+factory.define('author', authors, {
   name: 'John Smith'
 }).after(author => {
   // Do something smart
 });
 
-Factory.define('book', books, {
-  authorId: Factory.get('author'),
+factory.define('book', books, {
+  authorId: factory.get('author'),
   name: 'A book',
   year() { return _.random(1900, 2014); }
 });
 
 // We can also extend from an existing factory
-Factory.define('anotherBook', books, Factory.extend('book', {
+factory.define('anotherBook', books, factory.extend('book', {
   // ...
 }));
 ```
@@ -48,19 +52,19 @@ Factory.define('anotherBook', books, Factory.extend('book', {
 
 ```javascript
 // Ex. 1: Inserts a new book into the books collection
-const book = Factory.create('book');
+const book = factory.create('book');
 
 // Ex. 2: New fields can be added or overwritten
-const book = Factory.create('book', { name: 'A better book' });
+const book = factory.create('book', { name: 'A better book' });
 ```
 
 ## API
 
-Note: When calling `Factory.create('book')` both the Book *and* an Author are created. The newly created Author `_id` will then be automatically assigned to that field. In the case of calling `Factory.build('book')` as no insert operations are run, the `_id` will be faked.
+Note: When calling `factory.create('book')` both the Book *and* an Author are created. The newly created Author `_id` will then be automatically assigned to that field. In the case of calling `factory.build('book')` as no insert operations are run, the `_id` will be faked.
 
 ### define
 
-`Factory.define('name', Collection, doc).after(doc => { ... })`
+`factory.define('name', Collection, doc).after(doc => { ... })`
 
 - name
   - A name for this factory
@@ -69,17 +73,17 @@ Note: When calling `Factory.create('book')` both the Book *and* an Author are cr
 - doc
   - Document object
 - *.after* hook (Optional)
-  - Returns the newly inserted document after calling `Factory.create`
+  - Returns the newly inserted document after calling `factory.create`
 
 ### get
 
-`Factory.get('name')`
+`factory.get('name')`
 
 Returns the instance of *name*. Typical usage is to specify a relationship between collections as seen in the Book example above.
 
 ### build
 
-`Factory.build('name', doc)`
+`factory.build('name', doc)`
 
 Builds the data structure for this factory
 
@@ -90,7 +94,7 @@ Builds the data structure for this factory
 
 ### tree
 
-`Factory.tree('name', doc)`
+`factory.tree('name', doc)`
 
 Builds an object tree without `_id` fields. Useful for generating data for templates.
 
@@ -102,16 +106,16 @@ Builds an object tree without `_id` fields. Useful for generating data for templ
 Example:
 
 ```js
-  Factory.define('author', authors, {
+  factory.define('author', authors, {
     name: "John Smith"
   });
 
-  Factory.define('book', books, {
+  factory.define('book', books, {
     name: "A book",
-    author: Factory.get('author')
+    author: factory.get('author')
   });
 
-  const book = Factory.tree('book');
+  const book = factory.tree('book');
 ```
 
 `book` then equals:
@@ -127,7 +131,7 @@ Example:
 
 ### create
 
-`Factory.create('name', doc)`
+`factory.create('name', doc)`
 
 Creates (inserts) this factory into mongodb
 
@@ -138,7 +142,7 @@ Creates (inserts) this factory into mongodb
 
 ### extend
 
-`Factory.extend('name', doc)`
+`factory.extend('name', doc)`
 
 Extend from an existing factory
 
