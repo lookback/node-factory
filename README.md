@@ -22,7 +22,8 @@ A package for creating test data or for generating fixtures.
 
 ```javascript
 // Reference to mongo collections. Depending on how you interface with mongo
-// getting these references will vary.
+// getting these references will vary. The important part is that the collection
+// should have the async functions `insert` and `findOne`.
 const { authors, books } = db;
 
 Factory.define('author', authors, {
